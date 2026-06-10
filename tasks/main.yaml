@@ -25,7 +25,7 @@
   register: _gitea_check
   failed_when: _gitea_check.status is not defined or _gitea_check.status >= 400
 
-- name: Install gitea_runner and dependencies
+- name: Install gitea-runner and dependencies
   when:
   - ansible_facts['distribution'] == 'Archlinux'
   block:
@@ -38,22 +38,22 @@
       state: present
     with_items: "{{ gitea_runner_package_names }}"
 
-- name: Create gitea_runner config directory
+- name: Create gitea-runner config directory
   ansible.builtin.file:
     path: "{{ gitea_runner_config_file | dirname }}"
     state: directory
     mode: "0755"
 
-- name: Template gitea_runner config file
+- name: Template gitea-runner config file
   ansible.builtin.template:
-    src: etc/gitea_runner/config.yaml.j2
+    src: etc/gitea-runner/config.yaml.j2
     dest: "{{ gitea_runner_config_file }}"
     owner: "{{ gitea_runner_unix_user }}"
     group: "{{ gitea_runner_unix_group }}"
     mode: "0644"
   notify: Restart gitea_runner
 
-- name: Create gitea_runner lib directory
+- name: Create gitea-runner lib directory
   ansible.builtin.file:
     path: "{{ gitea_runner_lib_dir }}"
     owner: "{{ gitea_runner_unix_user }}"
@@ -61,14 +61,14 @@
     mode: "0755"
     state: directory
 
-- name: Check if gitea_runner is already registered
+- name: Check if gitea-runner is already registered
   ansible.builtin.stat:
     path: "{{ gitea_runner_lib_dir }}/.runner"
   register: _gitea_runner_registration_file
 
 - name: Register gitea_runner
   ansible.builtin.command:
-    cmd: "gitea_runner --config {{ gitea_runner_config_file }} register --instance {{ gitea_runner_gitea_url }} --no-interactive --token={{ gitea_runner_token }}"
+    cmd: "gitea-runner --config {{ gitea_runner_config_file }} register --instance {{ gitea_runner_gitea_url }} --no-interactive --token={{ gitea_runner_token }}"
     chdir: "{{ gitea_runner_lib_dir }}"
   no_log: true
   register: _gitea_runner_register_cmd
@@ -76,7 +76,7 @@
   changed_when: _gitea_runner_register_cmd.rc == 0
   when: not _gitea_runner_registration_file.stat.exists
 
-- name: Start and enable gitea_runner service
+- name: Start and enable gitea-runner service
   ansible.builtin.service:
     name: "{{ gitea_runner_service_name }}"
     state: started
