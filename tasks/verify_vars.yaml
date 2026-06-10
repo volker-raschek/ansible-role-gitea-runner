@@ -1,0 +1,11 @@
+---
+
+- name: Verify required variables are defined
+  ansible.builtin.assert:
+    that:
+    - lookup('vars', item) is defined
+    - lookup('vars', item) | length > 0
+    fail_msg: "Required variable '{{ item }}' is not defined or empty."
+  loop:
+  - gitea_runner_gitea_url
+  - gitea_runner_token

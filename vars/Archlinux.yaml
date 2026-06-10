@@ -1,0 +1,11 @@
+---
+
+gitea_runner_package_names:
+- gitea_runner
+
+gitea_runner_service_name: gitea_runner
+
+gitea_runner_unix_user: gitea_runner
+gitea_runner_unix_group: gitea_runner
+
+gitea_runner_lib_dir: /var/lib/gitea_runner

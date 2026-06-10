@@ -1,0 +1,83 @@
+---
+
+- name: Include OS-specific variables
+  ansible.builtin.include_vars: "{{ lookup('first_found', params) }}"
+  vars:
+    params:
+      files:
+      - "{{ ansible_facts['distribution'] }}_{{ ansible_facts['architecture'] }}.yaml"
+      - "{{ ansible_facts['distribution'] }}.yaml"
+      - "{{ ansible_facts['os_family'] }}_{{ ansible_facts['architecture'] }}.yaml"
+      - "{{ ansible_facts['os_family'] }}.yaml"
+      - main.yaml
+      paths:
+      - vars
+
+- name: Verify required variables
+  ansible.builtin.include_tasks: verify_vars.yaml
+
+- name: Check Gitea instance availability
+  ansible.builtin.uri:
+    url: "{{ gitea_runner_gitea_url }}"
+    method: GET
+    validate_certs: false
+    timeout: 10
+  register: _gitea_check
+  failed_when: _gitea_check.status is not defined or _gitea_check.status >= 400
+
+- name: Install gitea_runner and dependencies
+  when:
+  - ansible_facts['distribution'] == 'Archlinux'
+  block:
+  - name: Update package cache
+    community.general.pacman:
+      update_cache: "{{ gitea_runner_update_cache }}"
+  - name: Install packages
+    ansible.builtin.package:
+      name: "{{ item }}"
+      state: present
+    with_items: "{{ gitea_runner_package_names }}"
+
+- name: Create gitea_runner config directory
+  ansible.builtin.file:
+    path: "{{ gitea_runner_config_file | dirname }}"
+    state: directory
+    mode: "0755"
+
+- name: Template gitea_runner config file
+  ansible.builtin.template:
+    src: etc/gitea_runner/config.yaml.j2
+    dest: "{{ gitea_runner_config_file }}"
+    owner: "{{ gitea_runner_unix_user }}"
+    group: "{{ gitea_runner_unix_group }}"
+    mode: "0644"
+  notify: Restart gitea_runner
+
+- name: Create gitea_runner lib directory
+  ansible.builtin.file:
+    path: "{{ gitea_runner_lib_dir }}"
+    owner: "{{ gitea_runner_unix_user }}"
+    group: "{{ gitea_runner_unix_group }}"
+    mode: "0755"
+    state: directory
+
+- name: Check if gitea_runner is already registered
+  ansible.builtin.stat:
+    path: "{{ gitea_runner_lib_dir }}/.runner"
+  register: _gitea_runner_registration_file
+
+- name: Register gitea_runner
+  ansible.builtin.command:
+    cmd: "gitea_runner --config {{ gitea_runner_config_file }} register --instance {{ gitea_runner_gitea_url }} --no-interactive --token={{ gitea_runner_token }}"
+    chdir: "{{ gitea_runner_lib_dir }}"
+  no_log: true
+  register: _gitea_runner_register_cmd
+  failed_when: _gitea_runner_register_cmd.rc > 0
+  changed_when: _gitea_runner_register_cmd.rc == 0
+  when: not _gitea_runner_registration_file.stat.exists
+
+- name: Start and enable gitea_runner service
+  ansible.builtin.service:
+    name: "{{ gitea_runner_service_name }}"
+    state: started
+    enabled: true
