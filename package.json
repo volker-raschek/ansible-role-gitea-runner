@@ -1,6 +1,6 @@
 {
-  "name": "act-runner-ansible-role",
-  "homepage": "https://git.cryptic.systems/volker.raschek/act-runner-ansible-role.git",
+  "name": "gitea-runner-ansible-role",
+  "homepage": "https://git.cryptic.systems/volker.raschek/gitea-runner-ansible-role.git",
   "license": "MIT",
   "private": true,
   "engineStrict": true,
