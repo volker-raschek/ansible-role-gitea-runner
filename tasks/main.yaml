@@ -72,6 +72,8 @@
   register: _gitea_runner_registration_file
 
 - name: Register gitea_runner
+  become: true
+  become_user: "{{ gitea_runner_unix_user }}"
   ansible.builtin.command:
     cmd: "gitea-runner --config {{ gitea_runner_config_file }} register --instance {{ gitea_runner_gitea_url }} --no-interactive --token={{ gitea_runner_token }}"
     chdir: "{{ gitea_runner_lib_dir }}"
