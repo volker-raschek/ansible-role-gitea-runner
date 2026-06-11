@@ -1,7 +1,7 @@
 ## @section Act Runner
 
 ## @param gitea_runner_config_file Path to the gitea_runner configuration file
-gitea_runner_config_file: /etc/gitea_runner/config.yaml
+gitea_runner_config_file: /etc/gitea-runner/config.yaml
 
 gitea_runner_config:
   log:
