@@ -90,7 +90,6 @@ gitea_runner_config:
     require_docker: false
     ## @param gitea_runner_config.container.docker_timeout Timeout to wait for the docker daemon to be reachable
     docker_timeout: 0s
-
     ## @param gitea_runner_config.container.bind_workdir Bind the workspace to the host filesystem instead of using Docker volumes. This is required for Docker-in-Docker (DinD) setups when jobs use docker compose with bind mounts (e.g., ".:/app"), as volume-based workspaces are not accessible from the DinD daemon's filesystem.
     bind_workdir: false
 
