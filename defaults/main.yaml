@@ -75,6 +75,10 @@ gitea_runner_config:
     ## @param gitea_runner_config.host.workdir_parent The parent directory of a job's working directory
     workdir_parent:
 
+## @param gitea_runner_unix_extra_groups List of additional unix groups to append the executing gitea-runner user to.
+gitea_runner_unix_extra_groups: []
+# - docker
+
 ## @param gitea_runner_gitea_url The URL of the Gitea instance
 gitea_runner_gitea_url: ""
 

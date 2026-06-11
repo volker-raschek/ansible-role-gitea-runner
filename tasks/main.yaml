@@ -26,8 +26,7 @@
   failed_when: _gitea_check.status is not defined or _gitea_check.status >= 400
 
 - name: Install gitea-runner and dependencies
-  when:
-  - ansible_facts['distribution'] == 'Archlinux'
+  when: ansible_facts['distribution'] == 'Archlinux'
   block:
   - name: Update package cache
     community.general.pacman:
@@ -37,6 +36,12 @@
       name: "{{ item }}"
       state: present
     with_items: "{{ gitea_runner_package_names }}"
+
+- name: Add unix user to further groups
+  ansible.builtin.user:
+    name: "{{ gitea_runner_unix_user }}"
+    groups: "{{ gitea_runner_unix_groups + gitea_runner_unix_extra_groups }}"
+    append: true
 
 - name: Create gitea-runner config directory
   ansible.builtin.file:
